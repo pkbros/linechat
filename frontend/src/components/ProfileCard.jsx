@@ -1,8 +1,7 @@
 import { useState } from "react";
 
-const ProfileCard = () => {
-  const [username, setUsername] = useState("RedPanda007");
-  const [tempUsername, setTempUsername] = useState("RedPanda007");
+const ProfileCard = ({ username, setUsername }) => {
+  const [tempUsername, setTempUsername] = useState("username");
   return (
     <div className="hero bg-base-200">
       <div className="hero-content text-center">

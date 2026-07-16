@@ -8,11 +8,10 @@ app.use(cors());
 const server = http.createServer(app);
 
 function genCode() {
-  const letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+  const digits = "0123456789";
   let code = "";
   for (let i = 0; i < 6; i++) {
-    const idx = Math.floor(Math.random() * letters.length);
-    code += letters[idx];
+    code += digits[Math.floor(Math.random() * digits.length)];
   }
   return code;
 }

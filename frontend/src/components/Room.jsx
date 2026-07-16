@@ -1,20 +1,51 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import socket from "../socket";
 
-const Room = () => {
+const Room = ({username, onRoomReady}) => {
   const [roomId, setRoomId] = useState(0);
   const [isJoinRoom, setIsJoinRoom] = useState(false);
-  // const [isCreateRoom, setIsCreateRoom] = useState(false);
+  const [error, setError] = useState("");
+
+  useEffect(() => {
+    function onRoomCreated(newRoomId) {
+      if (typeof onRoomReady !== "function") {
+        console.warn(
+          "Stale listener fired — ignoring. Restart dev server if this persists.",
+        );
+        return;
+      }
+      console.log("Room created", newRoomId);
+      onRoomReady(newRoomId);
+    }
+
+    function onJoinedRoom(joinedRoomId) {
+      console.log("Joined room", joinedRoomId);
+      onRoomReady(joinedRoomId);
+    }
+
+    function onRoomNotFound() {
+      setError("Room not found.");
+    }
+
+    socket.on("room-created", onRoomCreated);
+    socket.on("joined-room", onJoinedRoom);
+    socket.on("room-not-found", onRoomNotFound);
+    return () => {
+      socket.off("room-created", onRoomCreated);
+      socket.off("joined-room", onJoinedRoom);
+      socket.off("room-not-found", onRoomNotFound);
+    };
+  }, [onRoomReady]);
 
   const handleCreateRoom = () => {
-    // Logic to create room
     console.log("room create pressed");
+    socket.emit("create-room");
   };
 
   const handleJoinRoom = () => {
-    // Logic to join room
-    console.log(roomId);
-    console.log("Initated Room Join with ID: ", roomId);
-    // console.log(roomId.toString().length)
+    setError("");
+    console.log("Initiated Room Join with ID: ", roomId);
+    socket.emit("join-room", { roomId, username });
   };
 
   return (
@@ -32,11 +63,7 @@ const Room = () => {
             </button>
             <button
               className="btn btn-soft btn-accent m-4"
-              onClick={() => {
-                {
-                  setIsJoinRoom(!isJoinRoom);
-                }
-              }}
+              onClick={() => setIsJoinRoom(!isJoinRoom)}
             >
               {isJoinRoom ? "Cancel" : "Join Room"}
             </button>
@@ -58,11 +85,8 @@ const Room = () => {
               <input
                 type="text"
                 autoComplete="one-time-code"
-                onChange={(e) => {
-                  setRoomId(e.target.value.toUpperCase());
-                }}
+                onChange={(e) => setRoomId(e.target.value)}
                 inputMode="numeric"
-                style={{ textTransform: "uppercase" }}
                 maxLength="6"
                 pattern="[0-9]{6}"
                 required
@@ -71,11 +95,12 @@ const Room = () => {
             <button
               className="btn btn-soft btn-accent m-4"
               onClick={handleJoinRoom}
-              disabled={roomId.toString().length !== 6 || 0}
+              disabled={roomId.length !== 6}
             >
               JOIN
             </button>
           </div>
+          {error && <p className="text-red-500">{error}</p>}
         </>
       )}
     </>
