@@ -59,9 +59,10 @@ const Room = () => {
                 type="text"
                 autoComplete="one-time-code"
                 onChange={(e) => {
-                  setRoomId(e.target.value);
+                  setRoomId(e.target.value.toUpperCase());
                 }}
                 inputMode="numeric"
+                style={{ textTransform: "uppercase" }}
                 maxLength="6"
                 pattern="[0-9]{6}"
                 required
