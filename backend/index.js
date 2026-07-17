@@ -6,6 +6,7 @@ const http = require("http");
 const app = express();
 app.use(cors());
 const server = http.createServer(app);
+const port = process.env.PORT || 3000;
 
 function genCode() {
   const digits = "0123456789";
@@ -33,7 +34,7 @@ const io = new Server(server, {
 });
 
 app.get("/", (req, res) => {
-  res.send("Hello World");
+  res.send("Line Chat backend is running");
 });
 
 io.on("connection", (socket) => {
@@ -84,4 +85,4 @@ io.on("connection", (socket) => {
     io.emit("online-users", io.engine.clientsCount);
   });
 });
-server.listen(3000, () => console.log("Server started"));
+server.listen(port, () => console.log(`Server started on port ${port}`));
